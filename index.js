@@ -1,5 +1,26 @@
 // biblioteca externa, inquire, instalar com npm install inquire
-const {select} = require('@inquirer/prompts');
+const {select, input} = require('@inquirer/prompts');
+
+let meta = {
+    value: 'Tomar água, 2L por dia',
+    checked: true
+};
+
+let metas = [meta];
+
+async function register(){
+    const meta = await input({message: 'Digite a meta:'});
+
+    // length, diz que há mais de um caractér.
+    if(meta.length == 0){
+        console.log('A meta não pode ser vazia!');
+        return;
+    }
+
+    metas.push(
+        {value: meta, checked: false}
+    );
+}
 
 // toda vez que usar await deve usar async antes da função
 async function initStart(){
@@ -19,7 +40,8 @@ async function initStart(){
 
         switch(option){
             case 'cadastrar':
-                console.log('vamos cadastrar');
+                await register();
+                console.log(metas)
                 break;
             case 'listar': 
                 console.log('vamos listar');
