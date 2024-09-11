@@ -30,14 +30,14 @@ async function list(){
         instructions: false
     });
 
+    listMetas.forEach((meta) => {
+        meta.checked = false;
+    });
+
     if(answers.length == 0){
         console.log('Nenhuma meta selecionada!');
         return;
     }
-
-    listMetas.forEach((meta) => {
-        meta.checked = false;
-    });
 
     answers.forEach((answer) => {
         // no find, procura-se a meta que é igual a resposta
@@ -49,6 +49,22 @@ async function list(){
     });
 
     console.log('Meta(s) marcada(s) como concluída(s)');
+}
+
+async function carried(){
+    const carriedOut = listMetas.filter((meta) => {
+        return meta.checked;
+    });
+
+    if(carriedOut.length == 0){
+        console.log('Não existe metas realizadas');
+        return;
+    }
+
+    await select({
+        message: 'Metas realizadas',
+        choices: [...carriedOut]
+    });
 }
 
 // toda vez que usar await deve usar async antes da função
@@ -63,19 +79,27 @@ async function initStart(){
             choices: [
                 {name: 'Cadastrar meta', value: 'cadastrar'},
                 {name: 'Listar metas', value: 'listar'},
+                {name: 'Metas realizadas', value:'realizadas'},
                 {sair: 'Sair', value: 'sair'}
             ],
         });
 
         switch(option){
+
             case 'cadastrar':
                 await register();
                 console.log(listMetas);
                 break;
+
             case 'listar': 
                 console.log('vamos listar');
                 await list();
                 break;
+
+            case 'realizadas':
+                await carried();
+                break;
+
             case 'sair': 
                 console.log('Até a próxima!');
                 return;
