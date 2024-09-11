@@ -83,6 +83,32 @@ async function noCarriedOut(){
     });
 }
 
+async function deleteMeta(){
+    // o map mapeia o original, muda o antigo e troca para um novo
+    const metasUnchecked = listMetas.map((meta) => {
+        return {value: meta.value, checked: false};
+    });
+
+    const response = await checkbox({
+        message: 'Selecione item para deletar',
+        choices: [...metasUnchecked],
+        instructions: false
+    });
+
+    if(response.length == 0){
+        console.log('Nenhum item para deletar');
+        return;
+    }
+
+    response.forEach((item) => {
+        listMetas = listMetas.filter((meta) => {
+            return meta.value != item;
+        });
+    });
+
+    console.log('Meta(s) deleta(s) com sucesso!');
+}
+
 // toda vez que usar await deve usar async antes da função
 async function initStart(){
 
@@ -97,6 +123,7 @@ async function initStart(){
                 {name: 'Listar metas', value: 'listar'},
                 {name: 'Metas realizadas', value:'realizadas'},
                 {name: 'Metas abertas', value: 'abertas'},
+                {name: 'Deletar metas', value: 'deletar'},
                 {sair: 'Sair', value: 'sair'}
             ],
         });
@@ -120,6 +147,11 @@ async function initStart(){
             case 'abertas':
                 await noCarriedOut();
                 return;
+
+            case 'deletar':
+                await deleteMeta();
+                break;
+            
             case 'sair': 
                 console.log('Até a próxima!');
                 return;
