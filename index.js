@@ -1,12 +1,12 @@
 // biblioteca externa, inquire, instalar com npm install inquire
-const {select, input} = require('@inquirer/prompts');
+const {select, input, checkbox} = require('@inquirer/prompts');
 
 let meta = {
     value: 'Tomar água, 2L por dia',
     checked: true
 };
 
-let metas = [meta];
+let listMetas = [meta];
 
 async function register(){
     const meta = await input({message: 'Digite a meta:'});
@@ -17,9 +17,38 @@ async function register(){
         return;
     }
 
-    metas.push(
+    listMetas.push(
         {value: meta, checked: false}
     );
+}
+
+async function list(){
+    const answers = await checkbox({
+        message: 'Use as setas para mudar de meta, o espaço para marcar e desmarcar e Enter para finalizar essa etapa',
+        choices: [...listMetas],
+        // os ... pega tudo do array listMetas e joga para esse array.
+        instructions: false
+    });
+
+    if(answers.length == 0){
+        console.log('Nenhuma meta selecionada!');
+        return;
+    }
+
+    listMetas.forEach((meta) => {
+        meta.checked = false;
+    });
+
+    answers.forEach((answer) => {
+        // no find, procura-se a meta que é igual a resposta
+        const metaChosen = listMetas.find((meta) => {
+            return meta.value == answer;
+        });
+
+        metaChosen.checked = true;
+    });
+
+    console.log('Meta(s) marcada(s) como concluída(s)');
 }
 
 // toda vez que usar await deve usar async antes da função
@@ -41,10 +70,11 @@ async function initStart(){
         switch(option){
             case 'cadastrar':
                 await register();
-                console.log(metas)
+                console.log(listMetas);
                 break;
             case 'listar': 
                 console.log('vamos listar');
+                await list();
                 break;
             case 'sair': 
                 console.log('Até a próxima!');
