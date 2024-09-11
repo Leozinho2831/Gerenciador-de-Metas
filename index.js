@@ -51,7 +51,7 @@ async function list(){
     console.log('Meta(s) marcada(s) como concluída(s)');
 }
 
-async function carried(){
+async function carriedOut(){
     const carriedOut = listMetas.filter((meta) => {
         return meta.checked;
     });
@@ -62,8 +62,24 @@ async function carried(){
     }
 
     await select({
-        message: 'Metas realizadas',
+        message: `Metas realizadas ${carriedOut.length}`,
         choices: [...carriedOut]
+    });
+}
+
+async function noCarriedOut(){
+    const noCarriedOut = listMetas.filter((meta) => {
+        return !meta.checked;
+    });
+
+    if(noCarriedOut.length == 0){
+        console.log('Todas as metas estão realizadas! :)');
+        return;
+    }
+
+    await select({
+        message: `Metas abertas ${noCarriedOut.length}`,
+        choices: [...noCarriedOut]
     });
 }
 
@@ -80,6 +96,7 @@ async function initStart(){
                 {name: 'Cadastrar meta', value: 'cadastrar'},
                 {name: 'Listar metas', value: 'listar'},
                 {name: 'Metas realizadas', value:'realizadas'},
+                {name: 'Metas abertas', value: 'abertas'},
                 {sair: 'Sair', value: 'sair'}
             ],
         });
@@ -97,9 +114,12 @@ async function initStart(){
                 break;
 
             case 'realizadas':
-                await carried();
+                await carriedOut();
                 break;
 
+            case 'abertas':
+                await noCarriedOut();
+                return;
             case 'sair': 
                 console.log('Até a próxima!');
                 return;
