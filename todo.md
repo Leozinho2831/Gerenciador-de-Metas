@@ -3,4 +3,5 @@
     - [x] Metas realizadas
     - [x] Metas abertas
 - [x] Remover metas
--  Sistema de mensagens
+- [x] Sistema de mensagens
+- [x] Persistir dados

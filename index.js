@@ -1,28 +1,63 @@
 // biblioteca externa, inquire, instalar com npm install inquire
 const {select, input, checkbox} = require('@inquirer/prompts');
+const fs = require('fs').promises;
 
-let meta = {
-    value: 'Tomar água, 2L por dia',
-    checked: true
-};
+let mensagem = 'Bem-vindo ao App de metas!';
 
-let listMetas = [meta];
+let listMetas
+
+async function loadMetas(){
+    // primeiro a função tenta
+    try {
+
+        const date = await fs.readFile('metas.json', 'utf-8');
+        listMetas = JSON.parse(date);
+
+    } catch {
+        listMetas = [];
+        // retorna um erro caso der errado
+    }
+}
+
+loadMetas();
+
+async function saveMetas(){
+    await fs.writeFile('metas.json', JSON.stringify(listMetas, null, 2));
+}
+
+// função que limpa o terminal
+function visibilyMessage(){
+    console.clear();
+
+    if(mensagem != ''){
+        console.log(mensagem);
+        console.log('');
+        mensagem = '';
+    }
+}
 
 async function register(){
     const meta = await input({message: 'Digite a meta:'});
 
     // length, diz que há mais de um caractér.
     if(meta.length == 0){
-        console.log('A meta não pode ser vazia!');
+        mensagem = 'A meta não pode ser vazia!';
         return;
     }
 
     listMetas.push(
         {value: meta, checked: false}
     );
+
+    mensagem = 'Meta cadastrada com sucesso!';
 }
 
 async function list(){
+    if(listMetas.length == 0){
+        mensagem = 'Não existem metas!';
+        return;
+    }
+
     const answers = await checkbox({
         message: 'Use as setas para mudar de meta, o espaço para marcar e desmarcar e Enter para finalizar essa etapa',
         choices: [...listMetas],
@@ -35,7 +70,7 @@ async function list(){
     });
 
     if(answers.length == 0){
-        console.log('Nenhuma meta selecionada!');
+        mensagem = 'Nenhuma meta selecionada!';
         return;
     }
 
@@ -48,7 +83,7 @@ async function list(){
         metaChosen.checked = true;
     });
 
-    console.log('Meta(s) marcada(s) como concluída(s)');
+    mensagem = 'Meta(s) marcada(s) como concluída(s)';
 }
 
 async function carriedOut(){
@@ -57,7 +92,7 @@ async function carriedOut(){
     });
 
     if(carriedOut.length == 0){
-        console.log('Não existe metas realizadas');
+        mensagem = 'Não existe metas realizadas! :(';
         return;
     }
 
@@ -73,7 +108,7 @@ async function noCarriedOut(){
     });
 
     if(noCarriedOut.length == 0){
-        console.log('Todas as metas estão realizadas! :)');
+        mensagem = 'Todas as metas estão realizadas! :)';
         return;
     }
 
@@ -96,7 +131,7 @@ async function deleteMeta(){
     });
 
     if(response.length == 0){
-        console.log('Nenhum item para deletar');
+        mensagem = 'Nenhum item para deletar';
         return;
     }
 
@@ -106,13 +141,16 @@ async function deleteMeta(){
         });
     });
 
-    console.log('Meta(s) deleta(s) com sucesso!');
+    mensagem = 'Meta(s) deleta(s) com sucesso!';
 }
 
 // toda vez que usar await deve usar async antes da função
 async function initStart(){
+    await loadMetas();
 
     while(true){
+        visibilyMessage();
+        await saveMetas();
         // faz esperar o usuário fazer a seleção
         const option = await select({
 
@@ -132,12 +170,11 @@ async function initStart(){
 
             case 'cadastrar':
                 await register();
-                console.log(listMetas);
                 break;
 
             case 'listar': 
-                console.log('vamos listar');
                 await list();
+                await saveMetas();
                 break;
 
             case 'realizadas':
